@@ -1,10 +1,11 @@
+import boundingData from './boundingData.json'
+
 // BoundingProperties contains the outer dimensions of the country that we are limiting by.
 // This is pretty quick and dirty, will probably pull it into a util file at some point.
 
 class BoundingProperties {
     constructor(props){
-        //This will eventually have more data points, and be pulled into a json file.
-        this.mapData = [[48.907741, -124.630657],[48.574863, -65.985043],[25.298377, -80.266874],[32.780128, -122.718046]]
+        this.mapData = boundingData
         this.boundSegments = this.getBoundingSegments()
     }
 
@@ -18,7 +19,7 @@ class BoundingProperties {
                 pointA: lastPoint,
                 pointB: point
             }
-            if(point[0] - lastPoint[0] === 0){
+            if(point[0] - lastPoint[0] === 0.0){
                 console.log("Hey lets not divide by zero here yeah?")
                 // Shouldn't be an issue, since we're picking custom points.  Just a dev log.
             }
