@@ -38,27 +38,46 @@ class BoundingProperties {
     // Extend the field lines from the stadium until they intersect with our bounding box
     // Currently reinserts the field between endpoints, the curvature of the map is causing issues.
     findLineTermination(line, slope, inter0, inter1){
-        var newLine = Array.from(line)
-        for(var index in this.boundSegments){
-            var segment = this.boundSegments[index]
-            var x = (inter0 - segment.b) / (segment.m - slope)
-            var y = slope * x + inter0
+        var greaterEndpointSegment, greaterEndpoint
+        var lesserEndpointSegment, lesserEndpoint
+        var segment, x, y
 
-            // If the location where the two lines intersect is between the endpoints of the segment, save it into our newline
+        for(var index in this.boundSegments){
+            segment = this.boundSegments[index]
+            x = (inter0 - segment.b) / (segment.m - slope)
+            y = slope * x + inter0
+
+            // If the location where the two lines intersect is between the endpoints of the segment, we found an intersection
             if(((segment.pointA[0] <= x && x <= segment.pointB[0]) || (segment.pointB[0] <= x && x <= segment.pointA[0])) &&
                 ((segment.pointA[1] <= y && y <= segment.pointB[1]) || (segment.pointB[1] <= y && y <= segment.pointA[1]))){
-                newLine.push([x,y])
 
-                //Also calculate for the other sideline.
-                x = (inter1 - segment.b) / (segment.m - slope)
-                y = slope * x + inter1
-                newLine.push([x,y])
-
-                //Reinsert field, helps with accuracy
-                newLine.push(newLine[0])
-                newLine.push(newLine[1])
+                // Saving the closest intersection in each direction
+                if(y > line[0][1]){
+                    if(greaterEndpoint == null || y < greaterEndpoint[1]){
+                        greaterEndpointSegment = segment
+                        greaterEndpoint = [x,y]
+                    }
+                }else{
+                    if(lesserEndpoint == null || y > lesserEndpoint[1]){
+                        lesserEndpointSegment = segment
+                        lesserEndpoint = [x,y]
+                    }
+                }
             }
         }
+        var newLine = [lesserEndpoint, line[0], greaterEndpoint]
+        //calculate other sideline
+        x = (inter1 - greaterEndpointSegment.b) / (greaterEndpointSegment.m - slope)
+        y = slope * x + inter1
+        newLine.push([x,y])
+
+        newLine.push(line[1])
+
+        x = (inter1 - lesserEndpointSegment.b) / (lesserEndpointSegment.m - slope)
+        y = slope * x + inter1
+        newLine.push([x,y])
+        // Todo - calculate more points inbetween the termination and source.  
+
         return newLine
     }
 }
