@@ -1,6 +1,6 @@
 import * as geolib from 'geolib';
 import GeodesicLine from './GeodesicLine'
-import {Polygon} from 'react-leaflet'
+import {Polygon, Tooltip} from 'react-leaflet'
 
 // Geodesic line (ELI5 version) imagine each field is right on the equator, and the line attempts to follow that, bisecting the planet.
 // I think this makes the 'straightest' line, ie the shortest distance between two points.
@@ -28,6 +28,10 @@ function getStraightLine(data, bounds){
 
     var sideline = [data.coords[1], data.coords[2]]
     var slope = (sideline[1][1] - sideline[0][1]) / (sideline[1][0] - sideline[0][0])
+    if(slope === Infinity || slope === 0){
+        console.log("You made a perfectly horizontal field, very cool, please fudge the numbers for " + data.team)
+        return line
+    }
 
     // Assuming both sidelines have the same slope.  miniscule difference.
     // They do have different intersects though, which helps maintain the field width 
@@ -50,9 +54,12 @@ function Field(params) {
     return (
         <ComponentType
             color={params.data.color} 
+            opacity={0.9}
             positions={line} 
             fill={true}
-            fillOpacity={0.2}/>
+            fillOpacity={0.2}>
+                <Tooltip sticky direction="bottom" offset={[0, 20]}>{params.data.team}</Tooltip>
+        </ ComponentType>
     )
 
 }
